@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "481576270136",
+    "project_id": "market-8c0f1",
+    "storage_bucket": "market-8c0f1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:481576270136:android:1d771b808944497a8469cd",
+        "android_client_info": {
+          "package_name": "com.example.alamir_supermarket"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDef11jKH6O87I4_0U_OKD25aRAR7mO9A4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

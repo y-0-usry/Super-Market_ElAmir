@@ -1,0 +1,93 @@
+// Firestore Security Rules للمشروع
+// انسخ هذا الكود في Firebase Console → Firestore → Rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ==========================================
+    // USERS COLLECTION
+    // ==========================================
+    match /users/{userId} {
+      // القراءة: المستخدم يقرأ بياناته + Owner يقرأ الكل
+      allow read: if 
+        request.auth.uid == userId || 
+        isOwner(request.auth.uid);
+      
+      // الإنشاء: أي مستخدم مصرح
+      allow create: if request.auth != null;
+      
+      // التحديث: المستخدم يحدث بياناته أو Owner
+      allow update: if 
+        request.auth.uid == userId || 
+        isOwner(request.auth.uid);
+      
+      // الحذف: Owner فقط
+      allow delete: if isOwner(request.auth.uid);
+    }
+
+    // ==========================================
+    // CATEGORIES COLLECTION
+    // ==========================================
+    match /categories/{categoryId} {
+      // القراءة: الكل يقرأ
+      allow read: if true;
+      
+      // الإنشاء/التحديث/الحذف: Owner فقط
+      allow create, update, delete: if isOwner(request.auth.uid);
+    }
+
+    // ==========================================
+    // PRODUCTS COLLECTION
+    // ==========================================
+    match /products/{productId} {
+      // القراءة: الكل يقرأ
+      // لكن Customer لا يرى 'quantity' في الكود (handled in app)
+      allow read: if true;
+      
+      // الإنشاء/التحديث/الحذف: Owner فقط
+      allow create, update, delete: if isOwner(request.auth.uid);
+    }
+
+    // ==========================================
+    // ORDERS COLLECTION
+    // ==========================================
+    match /orders/{orderId} {
+      // القراءة: العميل (userId يطابق)، Admin، Owner
+      allow read: if 
+        request.auth.uid == resource.data.userId || 
+        isAdmin(request.auth.uid) || 
+        isOwner(request.auth.uid);
+      
+      // الإنشاء: أي مستخدم مصرح
+      allow create: if request.auth != null;
+      
+      // التحديث: Admin أو Owner
+      allow update: if 
+        isAdmin(request.auth.uid) || 
+        isOwner(request.auth.uid);
+      
+      // الحذف: Owner فقط
+      allow delete: if isOwner(request.auth.uid);
+    }
+
+    // ==========================================
+    // HELPER FUNCTIONS
+    // ==========================================
+    
+    // التحقق من أن المستخدم Owner
+    function isOwner(uid) {
+      return get(/databases/$(database)/documents/users/$(uid)).data.role == 'owner';
+    }
+    
+    // التحقق من أن المستخدم Admin
+    function isAdmin(uid) {
+      return get(/databases/$(database)/documents/users/$(uid)).data.role == 'admin';
+    }
+    
+    // التحقق من أن المستخدم Customer
+    function isCustomer(uid) {
+      return get(/databases/$(database)/documents/users/$(uid)).data.role == 'customer';
+    }
+  }
+}

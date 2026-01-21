@@ -1,0 +1,85 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthed() {
+      return request.auth != null;
+    }
+
+    function userDoc(uid) {
+      return get(/databases/$(database)/documents/users/$(uid));
+    }
+
+    function isOwner() {
+      return isAuthed() && userDoc(request.auth.uid).data.role == 'owner';
+    }
+
+    function isAdmin() {
+      return isAuthed() && userDoc(request.auth.uid).data.role == 'admin';
+    }
+
+    function isActiveUser() {
+      return isAuthed() && userDoc(request.auth.uid).data.isActive == true;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read: if isAuthed() && (request.auth.uid == userId || isOwner() || isAdmin());
+
+      // Users can create their own doc only if role is 'customer'; owner can create any user (to add admins)
+      allow create: if isAuthed() && (
+        (request.auth.uid == userId && request.resource.data.role == 'customer') ||
+        isOwner()
+      );
+
+      // Owner can update any; user can update own doc but cannot change role or isActive
+      allow update: if isAuthed() && (
+        isOwner() ||
+        (request.auth.uid == userId &&
+          request.resource.data.role == resource.data.role &&
+          request.resource.data.isActive == resource.data.isActive
+        )
+      );
+
+      // Delete: owner only
+      allow delete: if isOwner();
+    }
+
+    // Categories collection
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow create, update, delete: if isActiveUser() && (isAdmin() || isOwner());
+    }
+
+    // Products collection
+    match /products/{productId} {
+      allow read: if true;
+      allow create, delete: if isActiveUser() && (isAdmin() || isOwner());
+      // Allow update for admin/owner, or for authenticated users updating only quantity/isAvailable (for orders)
+      allow update: if isActiveUser() && (
+        isAdmin() || 
+        isOwner() ||
+        (isAuthed() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['quantity', 'isAvailable']))
+      );
+    }
+
+    // Orders collection
+    match /orders/{orderId} {
+      allow read: if isAuthed();
+
+      allow create: if isAuthed();
+
+      // Update: admin/owner only
+      allow update: if isActiveUser() && (isAdmin() || isOwner());
+
+      // Delete: owner only
+      allow delete: if isOwner();
+    }
+
+    // Favorites subcollection
+    match /users/{userId}/favorites/{productId} {
+      allow read: if request.auth.uid == userId;
+      allow create, delete: if request.auth.uid == userId;
+    }
+  }
+}
