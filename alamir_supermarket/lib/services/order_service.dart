@@ -55,6 +55,7 @@ class OrderService {
           customerPhone: order.customerPhone,
           address: order.address,
           notes: order.notes,
+          paymentMethod: order.paymentMethod,
           createdAt: order.createdAt,
           deliveryTime: order.deliveryTime,
         );

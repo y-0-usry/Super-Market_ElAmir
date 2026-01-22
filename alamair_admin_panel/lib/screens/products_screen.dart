@@ -28,6 +28,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
     bool isAvailable = product?.isAvailable ?? true;
     bool isFeatured = product?.isFeatured ?? false;
     bool hasOldPrice = product?.oldPrice != null && product!.oldPrice! > 0;
+      List<Map<String, dynamic>> flavors = List<Map<String, dynamic>>.from(product?.flavors ?? []);
+    final flavorNameController = TextEditingController();
+    final flavorImageController = TextEditingController();
 
     showDialog(
       context: context,
@@ -126,6 +129,106 @@ class _ProductsScreenState extends State<ProductsScreen> {
                   value: isFeatured,
                   onChanged: (val) => setState(() => isFeatured = val ?? false),
                 ),
+                const SizedBox(height: 16),
+                // Flavors Section
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'النكهات (اختياري)',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      ),
+                      const SizedBox(height: 12),
+                      if (flavors.isNotEmpty)
+                        Column(
+                          children: flavors.asMap().entries.map((entry) {
+                            int idx = entry.key;
+                            Map<String, dynamic> flavor = entry.value;
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text('${flavor['name']}', 
+                                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                                        Text('${flavor['image']}',
+                                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete, color: Colors.red),
+                                    onPressed: () {
+                                      setState(() => flavors.removeAt(idx));
+                                    },
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: flavorNameController,
+                              decoration: const InputDecoration(
+                                hintText: 'اسم النكهة',
+                                border: OutlineInputBorder(),
+                                isDense: true,
+                              ),
+                              textDirection: TextDirection.rtl,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () {
+                              if (flavorNameController.text.trim().isEmpty ||
+                                  flavorImageController.text.trim().isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('أدخل اسم ورابط صورة النكهة')),
+                                );
+                                return;
+                              }
+                              setState(() {
+                                flavors.add({
+                                  'id': DateTime.now().millisecondsSinceEpoch.toString(),
+                                  'name': flavorNameController.text.trim(),
+                                  'image': flavorImageController.text.trim(),
+                                });
+                                flavorNameController.clear();
+                                flavorImageController.clear();
+                              });
+                            },
+                            child: const Text('إضافة'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: flavorImageController,
+                        decoration: const InputDecoration(
+                          hintText: 'رابط صورة النكهة',
+                          border: OutlineInputBorder(),
+                          isDense: true,
+                        ),
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -161,6 +264,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                         description: descController.text.trim(),
                         isAvailable: isAvailable,
                         isFeatured: isFeatured,
+                        flavors: flavors.isNotEmpty ? flavors : [],
                         createdAt: DateTime.now(),
                       ),
                     );
@@ -176,6 +280,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       'description': descController.text.trim(),
                       'isAvailable': isAvailable,
                       'isFeatured': isFeatured,
+                      'flavors': flavors.isNotEmpty ? flavors : [],
                     });
                   }
                   if (context.mounted) {

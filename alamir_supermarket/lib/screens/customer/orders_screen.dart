@@ -172,22 +172,40 @@ class OrdersScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           ...order.items.map((item) => Padding(
-                                padding: const EdgeInsets.only(bottom: 4),
-                                child: Row(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Expanded(
-                                      child: Text(
-                                        '${item.productName} × ${item.quantity}',
-                                        style: const TextStyle(color: Colors.white),
-                                      ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Flexible(
+                                          child: Text(
+                                            '${item.productName} × ${item.quantity}',
+                                            style: const TextStyle(color: Colors.white),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        Text(
+                                          '${item.price * item.quantity} جنيه',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFFF57C00),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    Text(
-                                      '${item.price * item.quantity} جنيه',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFFF57C00),
+                                    if (item.flavorName != null && item.flavorName!.isNotEmpty)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 4),
+                                        child: Text(
+                                          'النكهة: ${item.flavorName}',
+                                          style: const TextStyle(
+                                            color: Colors.grey,
+                                            fontSize: 12,
+                                          ),
+                                        ),
                                       ),
-                                    ),
                                   ],
                                 ),
                               )),

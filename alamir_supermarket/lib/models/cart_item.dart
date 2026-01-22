@@ -4,6 +4,9 @@ class CartItem {
   final String image;
   final double price;
   int quantity;
+  final String? flavorId;
+  final String? flavorName;
+  final String? flavorImage;
 
   CartItem({
     required this.productId,
@@ -11,6 +14,9 @@ class CartItem {
     required this.image,
     required this.price,
     this.quantity = 1,
+    this.flavorId,
+    this.flavorName,
+    this.flavorImage,
   });
 
   double get totalPrice => price * quantity;
@@ -22,6 +28,9 @@ class CartItem {
       'image': image,
       'price': price,
       'quantity': quantity,
+      'flavorId': flavorId,
+      'flavorName': flavorName,
+      'flavorImage': flavorImage,
     };
   }
 
@@ -32,6 +41,9 @@ class CartItem {
       image: map['image'] ?? '',
       price: (map['price'] ?? 0).toDouble(),
       quantity: (map['quantity'] is int) ? map['quantity'] : (map['quantity'] as num).toInt(),
+      flavorId: map['flavorId']?.toString(),
+      flavorName: map['flavorName']?.toString(),
+      flavorImage: map['flavorImage']?.toString(),
     );
   }
 }

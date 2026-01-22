@@ -14,6 +14,7 @@ class ProductModel {
   final bool isFeatured;
   final double rating; // تقييم المنتج
   final int reviewCount; // عدد التقييمات
+  final List<Map<String, dynamic>> flavors; // الأطعم [{id, name, image}, ...]
   final DateTime createdAt;
 
   ProductModel({
@@ -30,6 +31,7 @@ class ProductModel {
     this.isFeatured = false,
     this.rating = 0.0,
     this.reviewCount = 0,
+    this.flavors = const [],
     required this.createdAt,
   });
 
@@ -57,6 +59,7 @@ class ProductModel {
       'isFeatured': isFeatured,
       'rating': rating,
       'reviewCount': reviewCount,
+      'flavors': flavors,
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }
@@ -78,6 +81,7 @@ class ProductModel {
         isFeatured: map['isFeatured'] == true || map['isFeatured']?.toString() == 'true',
         rating: _parseDouble(map['rating']),
         reviewCount: _parseInt(map['reviewCount']),
+        flavors: (map['flavors'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [],
         createdAt: map['createdAt'] != null 
             ? (map['createdAt'] as Timestamp).toDate() 
             : DateTime.now(),

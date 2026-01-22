@@ -56,6 +56,18 @@ class _OrdersScreenState extends State<OrdersScreen> {
               _buildDetailRow('العنوان:', order.address),
               if (order.notes != null) _buildDetailRow('ملاحظات:', order.notes!),
               _buildDetailRow(
+                'طريقة الدفع:',
+                _getPaymentMethodText(order.paymentMethod),
+                isHighlight: true,
+              ),
+              if (order.paymentMethod != 'cash')
+                _buildDetailRow(
+                  'التعليمات:',
+                  order.paymentMethod == 'instapay'
+                      ? 'تحويل Instapay: 0102345678\nأخبر الكوريير برقم التحويل'
+                      : 'تحويل Vodafone Cash: 0102345678\nأخبر الكوريير برقم التحويل',
+                ),
+              _buildDetailRow(
                 'التاريخ:',
                 intl.DateFormat('yyyy-MM-dd HH:mm').format(order.createdAt),
               ),
@@ -67,22 +79,38 @@ class _OrdersScreenState extends State<OrdersScreen> {
               const SizedBox(height: 8),
               ...order.items.map((item) => Padding(
                     padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Text(
-                            '${item.productName} × ${item.quantity}',
-                            style: const TextStyle(color: Colors.white),
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '${item.productName} × ${item.quantity}',
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                            Text(
+                              '${item.price * item.quantity} ج.م',
+                              style: const TextStyle(
+                                color: Color(0xFFF57C00),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          '${item.price * item.quantity} ج.م',
-                          style: const TextStyle(
-                            color: Color(0xFFF57C00),
-                            fontWeight: FontWeight.bold,
+                        if (item.flavorName != null && item.flavorName!.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              'النكهة: ${item.flavorName}',
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 12,
+                              ),
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   )),
@@ -144,6 +172,19 @@ class _OrdersScreenState extends State<OrdersScreen> {
         ),
       ),
     );
+  }
+
+  String _getPaymentMethodText(String method) {
+    switch (method) {
+      case 'instapay':
+        return 'Instapay - 0102345678';
+      case 'vodafone':
+        return 'Vodafone Cash - 0102345678';
+      case 'cash':
+        return 'دفع عند الاستلام';
+      default:
+        return 'دفع عند الاستلام';
+    }
   }
 
   Widget _buildDetailRow(String label, String value, {bool isHighlight = false}) {
@@ -311,25 +352,41 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                 const SizedBox(height: 8),
                                 ...order.items.map((item) => Padding(
                                       padding: const EdgeInsets.only(bottom: 8),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Expanded(
-                                            child: Text(
-                                              '${item.productName} × ${item.quantity}',
-                                              style: const TextStyle(
-                                                color: Colors.white,
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  '${item.productName} × ${item.quantity}',
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ),
+                                              Text(
+                                                '${item.price * item.quantity} ج.م',
+                                                style: const TextStyle(
+                                                  color: Color(0xFFF57C00),
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          if (item.flavorName != null && item.flavorName!.isNotEmpty)
+                                            Padding(
+                                              padding: const EdgeInsets.only(top: 4),
+                                              child: Text(
+                                                'النكهة: ${item.flavorName}',
+                                                style: const TextStyle(
+                                                  color: Colors.grey,
+                                                  fontSize: 12,
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                          Text(
-                                            '${item.price * item.quantity} ج.م',
-                                            style: const TextStyle(
-                                              color: Color(0xFFF57C00),
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
                                         ],
                                       ),
                                     )),

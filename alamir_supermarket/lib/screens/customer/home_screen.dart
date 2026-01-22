@@ -174,12 +174,40 @@ class _CategoriesPageState extends State<CategoriesPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              cat.name,
-                              style: TextStyle(
-                                color: selected ? Colors.white : Colors.black87,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            Row(
+                              children: [
+                                Container(
+                                  height: 40,
+                                  width: 40,
+                                  margin: const EdgeInsets.only(right: 8),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    color: Colors.grey[200],
+                                    border: Border.all(color: Colors.grey[300]!, width: 1),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.network(
+                                      cat.image,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Icon(
+                                          Icons.category,
+                                          size: 24,
+                                          color: selected ? Colors.white : Colors.grey,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  cat.name,
+                                  style: TextStyle(
+                                    color: selected ? Colors.white : Colors.black87,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 6),
                             SizedBox(
@@ -559,18 +587,28 @@ class _HomePageState extends State<HomePage> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Image.network(
-                                category.image,
+                              Container(
                                 height: 50,
                                 width: 50,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Icon(
-                                    Icons.category,
-                                    size: 50,
-                                    color: isSelected ? Colors.white : Colors.grey,
-                                  );
-                                },
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.grey[200],
+                                  border: Border.all(color: Colors.grey[300]!, width: 1),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    category.image,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Icon(
+                                        Icons.category,
+                                        size: 30,
+                                        color: isSelected ? Colors.white : Colors.grey,
+                                      );
+                                    },
+                                  ),
+                                ),
                               ),
                               const SizedBox(height: 4),
                               Text(
@@ -799,12 +837,21 @@ class ProductCard extends StatelessWidget {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
+                          final hasFlavor = product.flavors.isNotEmpty;
+                          final firstFlavor = hasFlavor ? product.flavors.first : null;
+                          final flavorId = firstFlavor?['id']?.toString();
+                          final flavorName = firstFlavor?['name']?.toString();
+                          final flavorImage = firstFlavor?['image']?.toString();
+
                           cartProvider.addItem(
                             CartItem(
                               productId: product.id,
                               name: product.name,
-                              image: product.image,
+                              image: flavorImage?.isNotEmpty == true ? flavorImage! : product.image,
                               price: product.price,
+                              flavorId: flavorId,
+                              flavorName: flavorName,
+                              flavorImage: flavorImage,
                             ),
                           );
                           ScaffoldMessenger.of(context).showSnackBar(

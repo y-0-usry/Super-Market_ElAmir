@@ -17,26 +17,26 @@ class CartProvider extends ChangeNotifier {
   }
 
   void addItem(CartItem item) {
-    // Check if product already exists in cart
-    int index = _items.indexWhere((i) => i.productId == item.productId);
-    
+    final key = _key(item.productId, item.flavorId);
+    final index = _items.indexWhere((i) => _key(i.productId, i.flavorId) == key);
+
     if (index >= 0) {
-      // Increase quantity
       _items[index].quantity++;
     } else {
-      // Add new item
       _items.add(item);
     }
     notifyListeners();
   }
 
-  void removeItem(String productId) {
-    _items.removeWhere((item) => item.productId == productId);
+  void removeItem(String productId, {String? flavorId}) {
+    final key = _key(productId, flavorId);
+    _items.removeWhere((item) => _key(item.productId, item.flavorId) == key);
     notifyListeners();
   }
 
-  void updateQuantity(String productId, int quantity) {
-    int index = _items.indexWhere((i) => i.productId == productId);
+  void updateQuantity(String productId, int quantity, {String? flavorId}) {
+    final key = _key(productId, flavorId);
+    int index = _items.indexWhere((i) => _key(i.productId, i.flavorId) == key);
     if (index >= 0) {
       if (quantity > 0) {
         _items[index].quantity = quantity;
@@ -47,16 +47,18 @@ class CartProvider extends ChangeNotifier {
     }
   }
 
-  void increaseQuantity(String productId) {
-    int index = _items.indexWhere((i) => i.productId == productId);
+  void increaseQuantity(String productId, {String? flavorId}) {
+    final key = _key(productId, flavorId);
+    int index = _items.indexWhere((i) => _key(i.productId, i.flavorId) == key);
     if (index >= 0) {
       _items[index].quantity++;
       notifyListeners();
     }
   }
 
-  void decreaseQuantity(String productId) {
-    int index = _items.indexWhere((i) => i.productId == productId);
+  void decreaseQuantity(String productId, {String? flavorId}) {
+    final key = _key(productId, flavorId);
+    int index = _items.indexWhere((i) => _key(i.productId, i.flavorId) == key);
     if (index >= 0) {
       if (_items[index].quantity > 1) {
         _items[index].quantity--;
@@ -72,12 +74,16 @@ class CartProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool isInCart(String productId) {
-    return _items.any((item) => item.productId == productId);
+  bool isInCart(String productId, {String? flavorId}) {
+    final key = _key(productId, flavorId);
+    return _items.any((item) => _key(item.productId, item.flavorId) == key);
   }
 
-  int getQuantity(String productId) {
-    int index = _items.indexWhere((i) => i.productId == productId);
+  int getQuantity(String productId, {String? flavorId}) {
+    final key = _key(productId, flavorId);
+    int index = _items.indexWhere((i) => _key(i.productId, i.flavorId) == key);
     return index >= 0 ? _items[index].quantity : 0;
   }
+
+  String _key(String productId, String? flavorId) => '$productId|${flavorId ?? 'none'}';
 }

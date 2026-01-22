@@ -8,10 +8,41 @@ import '../../services/favorites_service.dart';
 import '../../models/cart_item.dart';
 import '../../services/app_language.dart';
 
-class ProductDetailScreen extends StatelessWidget {
+class ProductDetailScreen extends StatefulWidget {
   final ProductModel product;
 
   const ProductDetailScreen({super.key, required this.product});
+
+  @override
+  State<ProductDetailScreen> createState() => _ProductDetailScreenState();
+}
+
+class _ProductDetailScreenState extends State<ProductDetailScreen> {
+  String? _selectedFlavorId;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.product.flavors.isNotEmpty) {
+      _selectedFlavorId = widget.product.flavors.first['id']?.toString();
+    }
+  }
+
+  Map<String, dynamic>? get _selectedFlavor {
+    if (_selectedFlavorId == null) return null;
+    try {
+      return widget.product.flavors
+          .firstWhere((f) => f['id']?.toString() == _selectedFlavorId);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String get _displayImage {
+    final flavorImage = _selectedFlavor?['image']?.toString() ?? '';
+    if (flavorImage.isNotEmpty) return flavorImage;
+    return widget.product.image;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +54,7 @@ class ProductDetailScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(product.name),
+        title: Text(widget.product.name),
         backgroundColor: const Color(0xFFF57C00),
         foregroundColor: Colors.white,
         actions: [
@@ -31,11 +62,11 @@ class ProductDetailScreen extends StatelessWidget {
             StreamBuilder<Set<String>>(
               stream: favService.favoritesIds(user.uid),
               builder: (context, snapshot) {
-                final isFav = snapshot.data?.contains(product.id) ?? false;
+                final isFav = snapshot.data?.contains(widget.product.id) ?? false;
                 return IconButton(
                   icon: Icon(isFav ? Icons.favorite : Icons.favorite_border),
                   color: isFav ? Colors.redAccent : Colors.white,
-                  onPressed: () => favService.toggleFavorite(user.uid, product.id),
+                  onPressed: () => favService.toggleFavorite(user.uid, widget.product.id),
                 );
               },
             ),
@@ -47,7 +78,7 @@ class ProductDetailScreen extends StatelessWidget {
           children: [
             // Product Image
             Image.network(
-              product.image,
+              _displayImage,
               height: 300,
               width: double.infinity,
               fit: BoxFit.cover,
@@ -67,7 +98,7 @@ class ProductDetailScreen extends StatelessWidget {
                 children: [
                   // Product Name
                   Text(
-                    product.name,
+                    widget.product.name,
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -79,17 +110,17 @@ class ProductDetailScreen extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        '${product.price} ${lang.t('currency')}',
+                        '${widget.product.price} ${lang.t('currency')}',
                         style: const TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
                           color: Colors.orange,
                         ),
                       ),
-                      if (product.oldPrice != null) ...[
+                      if (widget.product.oldPrice != null) ...[
                         const SizedBox(width: 12),
                         Text(
-                          '${product.oldPrice} ${lang.t('currency')}',
+                          '${widget.product.oldPrice} ${lang.t('currency')}',
                           style: const TextStyle(
                             fontSize: 18,
                             decoration: TextDecoration.lineThrough,
@@ -107,7 +138,7 @@ class ProductDetailScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            '${((1 - product.price / product.oldPrice!) * 100).round()}% ${lang.t('discount')}',
+                            '${((1 - widget.product.price / widget.product.oldPrice!) * 100).round()}% ${lang.t('discount')}',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,
@@ -124,19 +155,48 @@ class ProductDetailScreen extends StatelessWidget {
                   Row(
                     children: [
                       Icon(
-                        product.isAvailable ? Icons.check_circle : Icons.cancel,
-                        color: product.isAvailable ? const Color(0xFFFF9800) : Colors.red,
+                        widget.product.isAvailable ? Icons.check_circle : Icons.cancel,
+                        color: widget.product.isAvailable ? const Color(0xFFFF9800) : Colors.red,
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        lang.t(product.isAvailable ? 'available' : 'outOfStock'),
+                        lang.t(widget.product.isAvailable ? 'available' : 'outOfStock'),
                         style: TextStyle(
                           fontSize: 16,
-                          color: product.isAvailable ? const Color(0xFFFF9800) : Colors.red,
+                          color: widget.product.isAvailable ? const Color(0xFFFF9800) : Colors.red,
                         ),
                       ),
                     ],
                   ),
+                  if (widget.product.flavors.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    Text(
+                      lang.t('chooseFlavor'),
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: widget.product.flavors.map((f) {
+                        final id = f['id']?.toString();
+                        final name = f['name']?.toString() ?? '';
+                        final isSelected = id == _selectedFlavorId;
+                        return ChoiceChip(
+                          label: Text(name.isEmpty ? lang.t('flavor') : name),
+                          selected: isSelected,
+                          onSelected: (_) {
+                            setState(() => _selectedFlavorId = id);
+                          },
+                          selectedColor: const Color(0xFFF57C00),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+
                   const SizedBox(height: 24),
 
                   // Description
@@ -149,7 +209,7 @@ class ProductDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    product.description,
+                    widget.product.description,
                     style: const TextStyle(
                       fontSize: 16,
                       color: Colors.black87,
@@ -166,13 +226,13 @@ class ProductDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   StreamBuilder<List<ProductModel>>(
-                    stream: productService.getProductsByCategory(product.categoryId),
+                    stream: productService.getProductsByCategory(widget.product.categoryId),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
                         return const Center(child: CircularProgressIndicator());
                       }
                       final related = snapshot.data!
-                          .where((p) => p.id != product.id)
+                          .where((p) => p.id != widget.product.id)
                           .take(6)
                           .toList();
                       if (related.isEmpty) {
@@ -214,17 +274,32 @@ class ProductDetailScreen extends StatelessWidget {
           ],
         ),
         child: ElevatedButton(
-          onPressed: product.isAvailable
+          onPressed: widget.product.isAvailable
               ? () {
-                  if (cartProvider.isInCart(product.id)) {
-                    cartProvider.increaseQuantity(product.id);
+                  final selectedFlavor = _selectedFlavor;
+                  if (widget.product.flavors.isNotEmpty && selectedFlavor == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(lang.t('chooseFlavor'))),
+                    );
+                    return;
+                  }
+
+                  final flavorId = selectedFlavor?['id']?.toString();
+                  final flavorName = selectedFlavor?['name']?.toString();
+                  final flavorImage = selectedFlavor?['image']?.toString();
+
+                  if (cartProvider.isInCart(widget.product.id, flavorId: flavorId)) {
+                    cartProvider.increaseQuantity(widget.product.id, flavorId: flavorId);
                   } else {
                     cartProvider.addItem(
                       CartItem(
-                        productId: product.id,
-                        name: product.name,
-                        image: product.image,
-                        price: product.price,
+                        productId: widget.product.id,
+                        name: widget.product.name,
+                        image: flavorImage?.isNotEmpty == true ? flavorImage! : widget.product.image,
+                        price: widget.product.price,
+                        flavorId: flavorId,
+                        flavorName: flavorName,
+                        flavorImage: flavorImage,
                       ),
                     );
                   }

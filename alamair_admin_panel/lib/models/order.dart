@@ -5,6 +5,7 @@ class Order {
   final String phone;
   final String address;
   final String? notes;
+  final String paymentMethod; // cash, instapay, vodafone
   final List<OrderItem> items;
   final double totalPrice;
   final String status; // pending, preparing, shipped, delivered, cancelled
@@ -17,6 +18,7 @@ class Order {
     required this.phone,
     required this.address,
     this.notes,
+    this.paymentMethod = 'cash',
     required this.items,
     required this.totalPrice,
     required this.status,
@@ -59,9 +61,10 @@ class Order {
       id: id,
       userId: map['userId'] ?? '',
       customerName: map['customerName'] ?? '',
-      phone: map['phone'] ?? '',
+      phone: map['phone'] ?? map['customerPhone'] ?? '',
       address: map['address'] ?? '',
       notes: map['notes'],
+      paymentMethod: map['paymentMethod']?.toString() ?? 'cash',
       items: items,
       totalPrice: _parsePrice(map['totalPrice']),
       status: map['status'] ?? 'pending',
@@ -76,6 +79,7 @@ class Order {
       'phone': phone,
       'address': address,
       'notes': notes,
+      'paymentMethod': paymentMethod,
       'items': items.map((item) => item.toMap()).toList(),
       'totalPrice': totalPrice,
       'status': status,
@@ -89,12 +93,18 @@ class OrderItem {
   final String productName;
   final double price;
   final int quantity;
+  final String? flavorId;
+  final String? flavorName;
+  final String? flavorImage;
 
   OrderItem({
     required this.productId,
     required this.productName,
     required this.price,
     required this.quantity,
+    this.flavorId,
+    this.flavorName,
+    this.flavorImage,
   });
 
   factory OrderItem.fromMap(Map<String, dynamic> map) {
@@ -118,6 +128,9 @@ class OrderItem {
       productName: map['productName'] ?? '',
       price: _parsePrice(map['price']),
       quantity: _parseInt(map['quantity']),
+      flavorId: map['flavorId']?.toString(),
+      flavorName: map['flavorName']?.toString(),
+      flavorImage: map['flavorImage']?.toString(),
     );
   }
 
@@ -127,6 +140,9 @@ class OrderItem {
       'productName': productName,
       'price': price,
       'quantity': quantity,
+      'flavorId': flavorId,
+      'flavorName': flavorName,
+      'flavorImage': flavorImage,
     };
   }
 }

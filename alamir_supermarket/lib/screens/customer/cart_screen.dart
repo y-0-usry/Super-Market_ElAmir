@@ -135,6 +135,17 @@ class CartScreen extends StatelessWidget {
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
+                                  if (item.flavorName != null && item.flavorName!.isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 4),
+                                      child: Text(
+                                        'النكهة: ${item.flavorName}',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ),
                                   const SizedBox(height: 8),
                                   Row(
                                     children: [
@@ -155,7 +166,7 @@ class CartScreen extends StatelessWidget {
                                                 minHeight: 32,
                                               ),
                                               onPressed: () {
-                                                cartProvider.decreaseQuantity(item.productId);
+                                                cartProvider.decreaseQuantity(item.productId, flavorId: item.flavorId);
                                               },
                                             ),
                                             Padding(
@@ -177,7 +188,7 @@ class CartScreen extends StatelessWidget {
                                                 minHeight: 32,
                                               ),
                                               onPressed: () {
-                                                cartProvider.increaseQuantity(item.productId);
+                                                cartProvider.increaseQuantity(item.productId, flavorId: item.flavorId);
                                               },
                                             ),
                                           ],
@@ -185,12 +196,15 @@ class CartScreen extends StatelessWidget {
                                       ),
                                       const Spacer(),
                                       // Total price
-                                      Text(
-                                        '${item.totalPrice} جنيه',
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFFF57C00),
+                                      Flexible(
+                                        child: Text(
+                                          '${item.totalPrice} جنيه',
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFFF57C00),
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
                                     ],
@@ -203,7 +217,7 @@ class CartScreen extends StatelessWidget {
                             IconButton(
                               icon: const Icon(Icons.delete_outline, color: Colors.red),
                               onPressed: () {
-                                cartProvider.removeItem(item.productId);
+                                cartProvider.removeItem(item.productId, flavorId: item.flavorId);
                               },
                             ),
                           ],

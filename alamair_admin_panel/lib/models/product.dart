@@ -9,6 +9,7 @@ class Product {
   final int quantity;
   final bool isAvailable;
   final bool isFeatured;
+  final List<Map<String, dynamic>> flavors;
   final DateTime createdAt;
 
   Product({
@@ -22,6 +23,7 @@ class Product {
     this.quantity = 0,
     this.isAvailable = true,
     this.isFeatured = false,
+    this.flavors = const [],
     required this.createdAt,
   });
 
@@ -64,6 +66,7 @@ class Product {
       quantity: _parseInt(map['quantity']),
       isAvailable: map['isAvailable'] ?? true,
       isFeatured: map['isFeatured'] ?? false,
+      flavors: _parseFlavors(map['flavors']),
       createdAt: map['createdAt']?.toDate() ?? DateTime.now(),
     );
   }
@@ -80,7 +83,19 @@ class Product {
       'quantity': quantity,
       'isAvailable': isAvailable,
       'isFeatured': isFeatured,
+      'flavors': flavors,
       'createdAt': createdAt,
     };
+  }
+
+  static List<Map<String, dynamic>> _parseFlavors(dynamic value) {
+    if (value == null) return [];
+    if (value is List) {
+      return value
+          .whereType<Map>()
+          .map((e) => e.map((k, v) => MapEntry(k.toString(), v)))
+          .toList();
+    }
+    return [];
   }
 }

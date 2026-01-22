@@ -190,16 +190,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               },
             ),
             _buildMenuItem(
-              icon: Icons.location_on_outlined,
-              title: lang('myAddresses'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AddressesScreen()),
-                );
-              },
-            ),
-            _buildMenuItem(
               icon: Icons.favorite_outline,
               title: lang('favorites'),
               onTap: () {
@@ -283,24 +273,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
       onTap: onTap,
-    );
-  }
-}
-
-class AddressesScreen extends StatelessWidget {
-  const AddressesScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final lang = Provider.of<AppLanguage>(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(lang.t('myAddresses')),
-        backgroundColor: const Color(0xFFF57C00),
-      ),
-      body: Center(
-        child: Text(lang.t('addYourAddress')),
-      ),
     );
   }
 }

@@ -10,6 +10,7 @@ class OrderModel {
   final String customerPhone;
   final String address;
   final String? notes;
+  final String paymentMethod; // cash, instapay, vodafone
   final DateTime createdAt;
   final DateTime? deliveryTime;
 
@@ -23,6 +24,7 @@ class OrderModel {
     required this.customerPhone,
     required this.address,
     this.notes,
+    this.paymentMethod = 'cash',
     required this.createdAt,
     this.deliveryTime,
   });
@@ -37,8 +39,10 @@ class OrderModel {
       'status': status,
       'customerName': customerName,
       'customerPhone': customerPhone,
+      'phone': customerPhone,
       'address': address,
       'notes': notes,
+      'paymentMethod': paymentMethod,
       'createdAt': Timestamp.fromDate(createdAt),
       'deliveryTime': deliveryTime != null ? Timestamp.fromDate(deliveryTime!) : null,
     };
@@ -75,6 +79,7 @@ class OrderModel {
         customerPhone: map['customerPhone']?.toString() ?? '',
         address: map['address']?.toString() ?? '',
         notes: map['notes']?.toString(),
+        paymentMethod: map['paymentMethod']?.toString() ?? 'cash',
         createdAt: map['createdAt'] is Timestamp
             ? (map['createdAt'] as Timestamp).toDate()
             : DateTime.now(),
@@ -104,6 +109,9 @@ class OrderItem {
   final String productImage;
   final double price;
   final int quantity;
+  final String? flavorId;
+  final String? flavorName;
+  final String? flavorImage;
 
   OrderItem({
     required this.productId,
@@ -111,6 +119,9 @@ class OrderItem {
     required this.productImage,
     required this.price,
     required this.quantity,
+    this.flavorId,
+    this.flavorName,
+    this.flavorImage,
   });
 
   Map<String, dynamic> toMap() {
@@ -120,6 +131,9 @@ class OrderItem {
       'productImage': productImage,
       'price': price,
       'quantity': quantity,
+      'flavorId': flavorId,
+      'flavorName': flavorName,
+      'flavorImage': flavorImage,
     };
   }
 
@@ -131,6 +145,9 @@ class OrderItem {
         productImage: map['productImage']?.toString() ?? '',
         price: _parseDouble(map['price']),
         quantity: _parseInt(map['quantity']),
+        flavorId: map['flavorId']?.toString(),
+        flavorName: map['flavorName']?.toString(),
+        flavorImage: map['flavorImage']?.toString(),
       );
     } catch (e) {
       print('Error parsing OrderItem: $e');

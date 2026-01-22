@@ -23,6 +23,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final OrderService _orderService = OrderService();
   final AuthService _authService = AuthService();
   bool _isLoading = false;
+  String _paymentMethod = 'cash';
 
   @override
   void initState() {
@@ -73,6 +74,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     productImage: item.image,
                     price: item.price,
                     quantity: item.quantity,
+                    flavorId: item.flavorId,
+                    flavorName: item.flavorName,
+                    flavorImage: item.flavorImage,
                   ))
               .toList(),
           totalPrice: cartProvider.totalPrice,
@@ -82,6 +86,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           notes: _notesController.text.trim().isNotEmpty
               ? _notesController.text.trim()
               : null,
+          paymentMethod: _paymentMethod,
           createdAt: DateTime.now(),
         );
 
@@ -176,10 +181,23 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             child: Row(
                               children: [
                                 Expanded(
-                                  child: Text(
-                                    '${item.name} × ${item.quantity}',
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            '${item.name} × ${item.quantity}',
+                                            style: const TextStyle(fontSize: 14),
+                                          ),
+                                          if (item.flavorName != null && item.flavorName!.isNotEmpty)
+                                            Padding(
+                                              padding: const EdgeInsets.only(top: 2),
+                                              child: Text(
+                                                'النكهة: ${item.flavorName}',
+                                                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
                                 ),
                                 Text(
                                   '${item.totalPrice} جنيه',
@@ -217,6 +235,41 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ),
               ),
               const SizedBox(height: 24),
+
+              // Payment Method
+              Text(
+                lang('paymentMethod'),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Column(
+                children: [
+                  RadioListTile<String>(
+                    value: 'cash',
+                    groupValue: _paymentMethod,
+                    onChanged: (val) => setState(() => _paymentMethod = val ?? 'cash'),
+                    title: Text(lang('cashOnDelivery')),
+                  ),
+                  RadioListTile<String>(
+                    value: 'instapay',
+                    groupValue: _paymentMethod,
+                    onChanged: (val) => setState(() => _paymentMethod = val ?? 'instapay'),
+                    title: const Text('Instapay'),
+                    subtitle: const Text('0102345678'),
+                  ),
+                  RadioListTile<String>(
+                    value: 'vodafone',
+                    groupValue: _paymentMethod,
+                    onChanged: (val) => setState(() => _paymentMethod = val ?? 'vodafone'),
+                    title: const Text('Vodafone Cash'),
+                    subtitle: const Text('0102345678'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
 
               // Customer Details
               Text(
